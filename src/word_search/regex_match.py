@@ -1,9 +1,9 @@
 import re
 
 
-def string_match(filename, term, case_insensitive=False):
+def regex_match(filename, term, case_insensitive=False):
     """
-    Do a simple string match.
+    Search using regular expressions
     
     Args:
       filename (string): Name of the file to search
@@ -17,20 +17,16 @@ def string_match(filename, term, case_insensitive=False):
     Raises:
         VauleError if the term is empty
     """
-    matches = 0
     if not term:
         raise ValueError('Search term was empty.')
+
+    total_matches = 0
+    if case_insensitive:
+        prog = re.compile(term, flags=re.IGNORECASE)
+    else:
+        prog = re.compile(term)
     with open(filename, 'r') as fin:
         for line in fin:
-            # Eliminate punctuation around words
-            words = re.sub('[,.!?;]', '', line).split()
-            for word in words:
-                if not case_insensitive:
-                    if term == word:
-                        matches += 1
-                else:
-                    if term.lower() == word.lower():
-                        matches += 1
-
-    return matches
-
+            matches = prog.findall(line)
+            total_matches += len(matches)
+    return total_matches

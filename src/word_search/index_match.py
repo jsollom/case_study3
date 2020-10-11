@@ -4,23 +4,6 @@ import os
 import re
 
 
-def md5(fname):
-    """
-    Create an md5sum for the file.
-    
-    Copied from:
-    https://stackoverflow.com/questions/3431825/generating-an-md5-checksum-of-a-file
-    
-    Returns
-        hex string representation for the digest
-    """
-    hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
-
-
 def create_index(filename):
     """
     Index all of the words in a file.
@@ -50,14 +33,12 @@ def create_index(filename):
     return index, case_insensitive_index
 
 
-def save_index(original_filename, index_filename, index, ci_index):
+def save_index(filename, index, ci_index):
     """
     Saves indices for a filename.
     """
-    with open(index_filename, 'w') as fout:
-        md5sum = md5(original_filename)
-        json_body = {'md5sum': md5sum,
-                     'index': index,
+    with open(filename, 'w') as fout:
+        json_body = {'index': index,
                      'ci_index': ci_index}
         json.dump(json_body, fout)
 
@@ -75,19 +56,15 @@ def get_index(filename):
     """
     file = os.path.basename(filename)
     directory = os.path.dirname(filename)
-    index_filename = "{}.{}.index".format(directory, file)
+    index_filename = "{}/.{}.index".format(directory, file)
     try:
         fin = open(index_filename)
         json_payload = json.load(fin)
-        if json_payload['md5sum'] == md5(filename):
-            return json_payload['index'], json_payload['ci_index']
+        return json_payload['index'], json_payload['ci_index']
     except FileNotFoundError:
-        pass
-    # Fall through to this code either if the index file was not found
-    # or if its md5sum did not match the existing index file.
-    index, ci_index = create_index(filename)
-    save_index(filename, index_filename, index, ci_index)
-    return index, ci_index
+        index, ci_index = create_index(filename)
+        save_index(index_filename, index, ci_index)
+        return index, ci_index
 
 
 def index_match(filename, term, case_insensitive=False):

@@ -1,6 +1,8 @@
 Case Study #3: Document Search
 
 This is my response to the Document Search case study.
+You can read about the analysis and write up in the document
+Test Case Study 3 Analysis and Write Up.docx.
 
 # Installation
 
